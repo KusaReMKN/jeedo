@@ -1,0 +1,215 @@
+.\" p
+.\" Copyright (c) 2022, KusaReMKN.
+.\" All rights reserved.
+.\"
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions are met:
+.\"
+.\" 1. Redistributions of source code must retain the above copyright notice,
+.\"    this list of conditions and the following disclaimer.
+.\"
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\"
+.\" THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+.\" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+.\" IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+.\" ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+.\" LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+.\" CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+.\" SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+.\" INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+.\" CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+.\" ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+.\" POSSIBILITY OF SUCH DAMAGE.
+.\"
+.Dd $Mdocdate$
+.Dt DIRDIST \&3 "Jeedo \f[ZCMI]Dark Side\fP\/ Programmer's Manual"
+.Os Jeedo "\f[ZCMI]Dark Side\fP"
+.
+.Sh 名称
+.Nm dirdist
+.Nd 方角や距離に関する処理の補遺
+.
+.Sh ライブラリ
+.Lb libm
+.
+.Sh 書式
+.Fd "#include \(dqdirdist.h\(dq"
+.Bd -literal -compact
+#define PI	/* 円周率 \(*p */	\e
+	3.141592653589793238462643383279502884197169399375105820974944e+00
+#define PI_2	/* \(*p/2 */	\e
+	1.570796326794896619231321691639751442098584699687552910487472e+00
+#define PI_180	/* \(*p/180 */	\e
+	1.745329251994329576923690768488612713442871888541725456097191e-02
+
+#define deg2rad(deg)	((deg) * PI_180)
+#define rad2deg(rad)	((rad) / PI_180)
+
+#define RNeE	6378137.000	/* 赤道半径 [m] */
+#define RNpE	6356752.314	/* 極半径 [m] */
+#define EE	/* 離心率の自乗; ((RNeE^2 - RNpE^2) / RNeE^2) */	\e
+	6.694380066764775264607878911781579375347155603499272940882800e-03
+#define RoPMC(alat)	/* 子午線曲率半径 */	\e
+	((RNeE * (1 - EE)) / pow(1 - EE * sin(alat) * sin(alat), 1.5))
+#define RoPVC(alat)	/* 卯酉線曲率半径 */	\e
+	(RNeE / sqrt(1 - EE * sin(alat) * sin(alat)))
+.Ed
+.Ft static void
+.Fn moveBy "struct latlng *p" "double distance" "double direction"
+.Ft static double
+.Fn normalizeLat "double lat"
+.Ft static double
+.Fn normalizeLng "double lng"
+.
+.Sh 解説
+.Fn deg2rad
+マクロと
+.Fn rad2deg
+マクロは、度数法と弧度法を互いに変換します。
+.Pp
+.Fn RoPMC
+マクロと
+.Fn RoPVC
+マクロは、緯度
+.Fa alat
+の付近における子午線曲率半径や卯酉線曲率半径を計算します。
+.Pp
+.Fn moveBy
+関数は、地点
+.Fa p
+を方角
+.Fa direction
+に距離
+.Fa distance
+だけ移動します。
+.Pp
+.Fn normalizeLat
+関数と
+.Fn normalizeLng
+関数は、公開されている関数
+.Fn normalize
+の緯度版と経度版であり、
+引数で与えられた角度をそれぞれの適切な範囲に正規化します。
+.
+.Sh 実装に関する注
+.Ss 関数マクロとして実装すること
+.Fn deg2rad
+マクロや
+.Fn rad2deg
+マクロなどは関数マクロとして実装されています。
+関数マクロはその名の通りマクロであり、
+その展開はプリプロセッサ実行時点で行われます。
+これによって実行時の関数呼び出しのオーバヘッドを軽減することができます。
+このような工夫は古い時代の
+.Ux
+の stdio などに見ることができます。
+しかし、現代のコンピュータは充分に高速であるので、
+このような工夫による恩恵は蚤の小便ほどもないかもしれません。
+.Ss Fn direction Ss 関数の実装
+この実装は
+.Aq Pa https://keisan.casio.jp/\:exec/\:system/\:1257670779
+にある計算式を元に実装されています。
+この計算式では地球を完全球として扱っており、\h'-.5n'
+.Fn distance
+関数や
+.Fn moveBy
+関数と相性が悪いかもしれません
+（これらの関数は地球を適当な楕円体として扱っています）\h'-1n'。
+可能なら、国土地理院の公開している計算式
+.Aq Pa https://vldb.gsi.go.jp/\:sokuchi/\:surveycalc/\:surveycalc/\:algorithm/\:bl2st/\:bl2st.htm
+を利用した実装に変更したほうが良いかもしれません。
+この他にも、
+.Aq Pa https://zenn.dev/\:bellbind/\:scraps/\:bb2cfb915430f5
+にあるメモは緯経度から方角や距離を計算することについてよくまとまっており、
+\h'-.5n'JavaScript による実装まで含んでいるので大変参考になります。
+.Ss Fn distance Ss 関数の実装
+この実装は
+.Aq Pa https://www.koeki-prj.org/\:\(tiyuuji/\:2017/\:gd2/\:06/\:distances.html
+にある JavaScript の実装を移植したものです。
+きちんと理解しようと思えば測地学に片足を突っ込むことになります。
+時間と体力と気力に余裕があるならば挑戦してみると良いでしょう。
+.Ss Fn is* Ss 関数群の有用性
+Is- の接頭辞を持つ
+.Fn is*
+関数は、
+引数として与えられるものが何か一定の条件を満たしている場合に真を返します。
+ここで、\h'-.5'
+.Fn is*
+関数を実装する代わりに条件値そのものを公開してしまうことも考えられますが、
+この方法は賢明であると思われません。
+このプログラムの相手をする将来のプログラマがその条件値の意味を履き違えることは
+充分に考えられ得るからです。
+Stdio に含まれる
+.Dv BUFSIZ
+定数はその良い（悪い）例でしょう。
+加えて、条件判定を関数として実装しておくことで、
+条件を満たしているか否かの判定式を十分簡潔に記述できるようになり、
+条件判定の手法を変更する場合にも少ない手間で作業を完了できます。
+.Ss Fn isOutside Ss 関数の意味
+この関数は「今から舵を切りながら前進して目的地に到達できるか」を判定します。
+舵を切りながら前進すると、車両は下図のように円弧を描くように進行します。
+ここで、この円弧の半径が回転半径と呼ばれるものであり、
+この文書が書かれた時点では 1\ m 程度であると報告されています
+（プログラム中では報告された値を信用せず 2\ m としています）\h'-1n'。
+さて、ここまで図示されていれば
+P\s-41\s+4 から P\s-43\s+4 の各点に到達可能か否かを判定する方法は
+プログラムから明らかでしょう。
+.PS
+move down 2.5; move right 0.1;
+line <-> 2.2 "" "\fCTURNING_RADIUS\fP (= 2\ m)";
+move up 0.3; move down 0.01; circle rad 0.01 "\h'1.5m'O" ""; move up 0.01;
+line left 2.2 dotted;
+move left 0.1 right 0; box width 0.2 height 0.2;
+move right 0.4; box width 0.2 height 0.2;
+move down 0.2 left 0.1;
+line up 0.4 then left 0.3 up 0.2 then left 0.3 down 0.2;
+line down 0.4 then right 0.6;
+move left 0.6 up 0.2;
+move right 4.4;
+K: line 0;
+move left 4.4;
+arc cw up rad 2.2 to K dashed;
+move right 0.5 up 0.5;
+move down 0.01; circle rad 0.01 "P\s-43\s+4" ""; move up 0.03;
+move down 0.5 left 0.5;
+move left 2.2 up 2.2;
+line down 2.2 dotted;
+move up 0.9 left 0.4;
+move right 0.01; circle rad 0.01 "P\s-42\s+4" ""; move left 0.03;
+move right 0.4 up 1.4 down 0;
+box width 0.2 height 0.2 dashed 0.03;
+move down 0.4; box width 0.2 height 0.2 dashed 0.03;
+move up 0.1 left 0.2;
+line right 0.4 then right 0.2 up 0.3 then left 0.2 up 0.3 dashed 0.03;
+line left 0.4 then down 0.6 dashed 0.03;
+move up 0.3 left 1.6;
+move right 0.01; circle rad 0.01 "P\s-41\s+4" ""; move left 0.03;
+.PE
+.Ss Fn moveBy Ss 関数の実装
+この実装は
+.Aq Pa https://gist.github.com/\:naoty/\:5821666
+にある Ruby の実装を参考にして、かつ
+.Fn distance
+関数との計算誤差を小さくするように実装されています。
+ただし、この関数の中でいう東とは等角航路における東であり、
+どれだけ東に進んでも緯度は（あまり）変化しません
+（逆に、大圏航路の東では緯度が変化し得ます）\h'-1n'。
+.Ss Fn normalize* Ss 関数の実装
+本来、いづれか一方の不等号は等号を含むべきです。
+.Ss 数学関数の例外処理
+これらの関数群の数学演算処理において、一切の例外処理は行われていません。
+もし可能ならば、これらの処理に例外処理を追加してみてください
+（関連項目も参照してください）\h'-1n'。
+.
+.Sh 関連項目
+.Xr math_error 3
+及び Jeedo Programmer's Manual の
+.Xr dirdist 3
+.
+.Sh 著作権
+\(co 2022
+.An KusaReMKN .
+The 2-Clause BSD License の下で利用可能です。

@@ -1,0 +1,71 @@
+.\"
+.\" Copyright (c) 2022, KusaReMKN.
+.\" All rights reserved.
+.\"
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions are met:
+.\"
+.\" 1. Redistributions of source code must retain the above copyright notice,
+.\"    this list of conditions and the following disclaimer.
+.\"
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\"
+.\" THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+.\" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+.\" IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+.\" ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+.\" LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+.\" CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+.\" SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+.\" INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+.\" CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+.\" ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+.\" POSSIBILITY OF SUCH DAMAGE.
+.\"
+.Dd $Mdocdate$
+.Dt DRIVE \&3 "Jeedo Programmer's Manual"
+.Os Jeedo
+.
+.Sh 名称
+.Nm drive
+.Nd 車両を制御する
+.
+.Sh ライブラリ
+.Lb libc ,
+.Lb libc_r ,
+.Lb libm
+及び
+.Lb Jansson (libjansson, \-ljansson)
+.
+.Sh 書式
+.Fd "#include \(dqdrive.h\(dq"
+.Ft void *
+.Fn drive "void *arg"
+.
+.Sh 解説
+.Fn drive
+関数は、車両を制御します。
+この関数は
+.Xr pthread_create 3
+に渡されることを期待して実装されており、\h'-.5n'
+.Fa arg
+はメインスレッドと通信するためのソケット記述子を指している必要があります。
+.
+.Sh 関連項目
+Jeedo Programmer's Manual の
+.Xr compass 3 ,
+.Xr debug 3 ,
+.Xr denkino 3 ,
+.Xr dirdist 3
+及び
+.Xr gps 3
+.
+.Sh 著作権
+\(co 2022
+.An KusaReMKN .
+The 2-Clause BSD License の下で利用可能です。
+.
+.Sh バグ
+きちんと動作する保証がありません（2022-10-24）\h'-1n'。

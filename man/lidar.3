@@ -1,0 +1,133 @@
+.\"
+.\" Copyright (c) 2022, KusaReMKN.
+.\" All rights reserved.
+.\"
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions are met:
+.\"
+.\" 1. Redistributions of source code must retain the above copyright notice,
+.\"    this list of conditions and the following disclaimer.
+.\"
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\"
+.\" THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+.\" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+.\" IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+.\" ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+.\" LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+.\" CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+.\" SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+.\" INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+.\" CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+.\" ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+.\" POSSIBILITY OF SUCH DAMAGE.
+.\"
+.Dd $Mdocdate$
+.Dt LIDAR \&3 "Jeedo Programmer's Manual"
+.Os Jeedo
+.
+.Sh 名称
+.Nm LiDAR
+.Nd 障害物までの距離を取得する
+.
+.Sh ライブラリ
+.Lb libc ,
+及び
+.Lb libc_r
+.
+.Sh 書式
+.Fd "#include \(dqlidar.h\(dq"
+.Bd -literal -compact
+struct lidarPoint {
+	uint16_t distance;	/* 距離 [mm] */
+	uint8_t  intensity;	/* 明るさ */
+} __attribute__((__packed__));
+.Ed
+.Ft int
+.Fn initLidar "void"
+.Ft int
+.Fn readLidar "struct lidarPoint buf[360]"
+.Ft int
+.Fn endLidar "void"
+.
+.Sh 解説
+.Fn initLidar
+関数は、障害物までの距離を取得するための様々な初期化を行います。
+.Pp
+.Fn readLidar
+関数は、1\(de 毎の障害物までの距離を
+.Fa buf
+の指す領域に格納します。
+.Pp
+.Fn endLidar
+関数は、現在位置の取得を終了するための様々な後始末を行います。
+.
+.Sh 戻り値
+.Fn initLidar
+関数、\h'-.5n'
+.Fn readLidar
+関数及び
+.Fn endLidar
+関数は処理が成功すると値 0 を返します。
+さもなければ値 \-1 を返し、エラーを示すために
+.Va errno
+を設定します。
+.
+.Sh エラー
+.Fn initLidar
+関数は、以下のような場合にエラーになります。
+.Bl -tag -width Er
+.It Bq Er EBUSY
+既に初期化されており、後始末されていません。
+.El
+.Pp
+加えて、\h'-.5n'
+.Xr sched_get_priority_max 2 ,
+.Xr sched_get_priority_min 2 ,
+.Xr pthread_attr_init 3 ,
+.Xr pthread_attr_setinheritsched 3 ,
+.Xr pthread_attr_setschedparam 3 ,
+.Xr pthread_attr_setschedpolicy 3 ,
+.Xr pthread_create 3
+及び
+.Xr pthread_mutex_init 3
+に由来するエラーを発生させます。
+.Pp
+.Fn readLidar
+関数は、以下のような場合にエラーになります。
+.Bl -tag -width Er
+.It Bq Er ESRCH
+監視スレッドが起動されていないか、既に終了しています。
+.El
+.Pp
+加えて、\h'-.5n'
+.Xr pthread_mutex_lock 3
+及び
+.Xr pthread_mutex_unlock 3
+に由来するエラーを発生させます。
+.Pp
+.Fn endLidar
+関数は、\h'-.5n'
+.Xr pthread_cancel 3 ,
+.Xr pthread_join 3
+及び
+.Xr pthread_mutex_destroy 3
+に由来するエラーを発生させます。
+.
+.Sh 関連項目
+.Xr pthreads 7
+.
+.Sh 著作権
+\(co 2022
+.An KusaReMKN .
+The 2-Clause BSD License の下で利用可能です。
+.
+.Sh バグ
+.Fn initLidar
+関数、\h'-.5n'
+.Fn readLidar
+関数及び
+.Fn endLidar
+関数は、処理の過程で必要になる情報を内部の静的オブジェクトに記憶しています。

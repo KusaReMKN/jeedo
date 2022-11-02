@@ -1,0 +1,160 @@
+.\"
+.\" Copyright (c) 2022, KusaReMKN.
+.\" All rights reserved.
+.\"
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions are met:
+.\"
+.\" 1. Redistributions of source code must retain the above copyright notice,
+.\"    this list of conditions and the following disclaimer.
+.\"
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\"
+.\" THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+.\" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+.\" IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+.\" ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+.\" LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+.\" CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+.\" SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+.\" INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+.\" CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+.\" ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+.\" POSSIBILITY OF SUCH DAMAGE.
+.\"
+.Dd $Mdocdate$
+.Dt I2C \&3 "Jeedo Programmer's Manual"
+.Os Jeedo
+.
+.Sh 名称
+.Nm I\(S2C
+.Nd I\(S2C/SMBus 通信プロトコル
+.
+.Sh ライブラリ
+.Lb libc
+.
+.Sh 書式
+.Fd "#include \(dqi2c.h\(dq"
+.Ft int
+.Fn i2cOpen "int bus" "int addr"
+.Ft int
+.Fn i2cWriteQuick "int fd" "int rdwr"
+.Ft int
+.Fn i2cReadByte "int fd"
+.Ft int
+.Fn i2cWriteByte "int fd" "int reg"
+.Ft int
+.Fn i2cReadByteData "int fd" "int reg"
+.Ft int
+.Fn i2cWriteByteData "int fd" "int reg" "int byte"
+.Ft int
+.Fn i2cReadWordData "int fd" "int reg"
+.Ft int
+.Fn i2cWriteWordData "int fd" "int reg" "int data"
+.
+.Sh 解説
+.Fn i2cOpen
+関数は、バス
+.Fa bus
+に接続されているアドレス
+.Fa addr
+のデバイスを開きます。
+各バスに対応するデバイスファイルは
+.Pa /dev/i2c-%d
+です。
+.Pp
+.Fn i2cWriteQuick
+関数は、記述子
+.Fa fd
+に対応しているデバイスに対して 1\ bit の情報を書き込みます。
+情報は SMBus の Read/Write のビットとして送信されます。
+.Pp
+.Fn i2cReadByte
+関数は、記述子
+.Fa fd
+に対応しているデバイスから 1\ byte を読み出します。
+.Pp
+.Fn i2cWriteByte
+関数は、記述子
+.Fa fd
+に対応しているデバイスに
+.Fa reg
+の値を __u8 にキャストして 1\ byte 書き込みます。
+.Pp
+.Fn i2cReadByteData
+関数は、記述子
+.Fa fd
+に対応しているデバイスのレジスタ
+.Fa reg
+から 1\ byte 読み出します。
+.Pp
+.Fn i2cWriteByteData
+関数は、記述子
+.Fa fd
+に対応しているデバイスのレジスタ
+.Fa reg
+に
+.Fa data
+の値を __u8 にキャストして 1\ byte 書き込みます。
+.Pp
+.Fa i2cReadWordData
+関数は、記述子
+.Fa fd
+に対応しているデバイスのレジスタ
+.Fa reg
+から 2\ byte 読み出します。
+.Pp
+.Fn i2cWriteWordData
+関数は、記述子
+.Fa fd
+に対応しているデバイスのレジスタ
+.Fa reg
+に
+.Fa data
+の値を __u16 にキャストして 2\ byte 書き込みます。
+.
+.Sh 戻り値
+.Fn i2cOpen
+関数は、正常に完了するとファイル記述子である非負整数を返します。
+.Pp
+.Fn i2cReadByte
+関数、\h'-.5n'
+.Fn i2cReadByteData
+関数、及び
+.Fn i2cReadWordData
+関数は、正常に完了すると読み出された文字や語を返します。
+.Pp
+それら以外の関数は成功すると 0 を返します。
+.Pp
+いづれの関数も失敗すると \-1 を返し、エラーを示すために
+.Va errno
+を設定します。
+.
+.Sh エラー
+.Sx 関連項目
+に挙げたページの
+.Em I2C/SMBUS Fault Codes
+を参照してください。
+.
+.Sh 関連項目
+.Lk https://docs.kernel.org/i2c/ "I2C/SMBus Subsystem"
+.
+.Sh 著作権
+\(co 2022
+.An KusaReMKN .
+The 2-Clause BSD License の下で利用可能です。
+.
+.Sh バグ
+I\(S2C の読みが「アイ・スケアド・シー（I squared C）\h'-1n'」
+であることは直感的ではありません。
+.Pp
+この関数群を書いていたプログラマは途中で飽きてしまったようです。
+SMBus の全ての機能を利用できるだけの関数は実装されていません。
+誰かが完全な実装を完成させてくれることを期待しています。
+全ての機能の一覧は\h'-.5n'
+.Sx 関連項目
+に挙げたページの
+.Em I2C/SMBus Functionality
+にあります。

@@ -1,0 +1,155 @@
+.\"
+.\" Copyright (c) 2022, KusaReMKN.
+.\" All rights reserved.
+.\"
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions are met:
+.\"
+.\" 1. Redistributions of source code must retain the above copyright notice,
+.\"    this list of conditions and the following disclaimer.
+.\"
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\"
+.\" THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+.\" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+.\" IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+.\" ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+.\" LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+.\" CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+.\" SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+.\" INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+.\" CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+.\" ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+.\" POSSIBILITY OF SUCH DAMAGE.
+.\"
+.Dd $Mdocdate$
+.Dt DENKINO \&3 "Jeedo Programmer's Manual"
+.Os Jeedo
+.
+.Sh 名称
+.Nm denkino
+.Nd 車両制御部との通信
+.
+.Sh ライブラリ
+.Lb libc
+.
+.Sh 書式
+.In termios.h
+.Fd "#include \(dqdenkino.h\(dq"
+.Ft int
+.Fn openDenkino "struct termios *prev"
+.Ft int
+.Fn talkDenkino "int fd" "const char *restrict req" "char *restrict res" \
+                "size_t len"
+.Ft int
+.Fn closeDenkino "int fd" "const struct termios *prev"
+.
+.Sh 解説
+.Fn openDenkino
+関数は、車両制御部と通信するためにシルアルポートを開き、初期化を行います。
+初期化以前の設定は
+.Fa prev
+の指す領域に格納され、これは通信を終了するときに利用します。
+.Fa prev
+に
+.Dv NULL
+を指定することで初期化以前の設定を破棄できます。
+.Pp
+.Fn talkDenkino
+関数は、記述子
+.Fa fd
+に対応する車両制御部に対してリクエストメッセージ
+.Fa req
+を送信し、レスポンスメッセージを
+.Fa res
+の指すバッファに格納します。
+バッファの領域は
+.Fa len
+文字分だけ確保されている必要があります。
+リクエストメッセージにデリミタ文字
+.Ql \en
+が含まれている場合、最初に遭遇するデリミタ文字までの部分が送信されます。
+受信されたレスポンスメッセージは必ず文字列終端されます。
+リクエストメッセージを送信すれどレスポンスメッセージを受信せずに
+一定時間経つ場合、リクエストメッセージを再送信します。
+.Pp
+.Fn closeDenkino
+関数は、記述子
+.Fa fd
+を閉じます。
+その際、初期化以前の設定
+.Fa prev
+を復元します。
+.Fa prev
+に
+.Dv NULL
+を指定した場合、\h'-.5n'
+.Xr close 2
+に
+.Fa fd
+を渡したものと等価です。
+.
+.Sh 戻り値
+.Fn openDenkino
+関数は、正常に完了するとファイル記述子である非負整数を返します。
+.Pp
+.Fn talkDenkino
+関数及び
+.Fn closeDenkino
+関数は、正常に完了すると 0 を返します。
+.Pp
+いづれの関数も失敗すると \-1 を返し、エラーを示すために
+.Va errno
+を設定します。
+.
+.Sh エラー
+.Fn openDenkino
+関数は、\h'-.5n'
+.Xr fcntl 2 ,
+.Xr open 2 ,
+.Xr tcgetattr 3
+及び
+.Xr tcsetattr 3
+に由来するエラーを発生させます。
+.Pp
+.Fn talkDenkino
+関数は、以下のような場合にエラーになります。
+.Bl -tag -width Er
+.It Bq Er EMSGSIZE
+リクエストメッセージが長すぎます。
+.It Bq Er EAGAIN
+車両制御部が立て続けに応答しません。
+.It Bq Er ENOBUFS
+バッファのサイズに対してレスポンスメッセージが長すぎるか、
+レスポンスメッセージがデリミタ文字によって終端されていません。
+.El
+.Pp
+加えて、\h'-.5n'
+.Xr read 2 ,
+.Xr select 2 ,
+.Xr write 2
+及び
+.Xr snprintf 3
+に由来するエラーを発生させま\p
+す。
+.Pp
+.Fn closeDenkino
+関数は、\h'-.5n'
+.Xr close 2
+及び
+.Xr tcsetattr 3
+に由来するエラーを発生させます。
+.
+.Sh 関連項目
+.Xr termios 3
+.
+.Sh 著作権
+\(co 2022
+.An KusaReMKN .
+The 2-Clause BSD License の下で利用可能です。
+.
+.Sh バグ
+.Fn talkDenkino
+関数における再送信までの待ち時間と再試行回数は改善の余地があります。
