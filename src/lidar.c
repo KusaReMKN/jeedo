@@ -241,7 +241,8 @@ fatal:		errsv = errno;
 	(void)cfsetspeed(&tio, B230400);
 	tio.c_cflag = (tio.c_cflag & ~CSIZE) | CS8;
 	tio.c_cc[VMIN] = sizeof(struct lidarPacket);
-	tio.c_cc[VTIME] = 0;
+#define LIDAR_TIMEOUT	10	/* 1 sec */
+	tio.c_cc[VTIME] = LIDAR_TIMEOUT;
 	if (tcsetattr(fd, TCSANOW, &tio) == -1)
 		goto fatal;
 
@@ -281,7 +282,9 @@ readPacket(int fd, struct lidarPacket *packet)
 		while (cur < sizeof(*packet)) {
 			nRead = read(fd, (char *)packet + cur,
 					sizeof(*packet) - cur);
-			if (nRead == -1)
+			if (nRead == 0)
+				errno = EREMOTEIO;
+			if (nRead == -1 || nRead == 0)
 				return -1;
 			cur += nRead;
 		}
