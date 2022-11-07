@@ -35,6 +35,7 @@
 #include <pthread.h>
 #include <sched.h>
 #include <string.h>
+#include <time.h>
 #include <unistd.h>
 
 #include "dirdist.h"
@@ -182,6 +183,7 @@ watchGps(void *arg)
 	"?WATCH={\"enable\":true,\"json\":true,\"scaled\",true}\n"
 	int sock;
 	json_t *lat, *lon, *root;
+	time_t last;
 
 	running = 1;
 	sock = tcpConnect(GPSD_HOST, GPSD_SERV);
@@ -205,6 +207,11 @@ watchGps(void *arg)
 			pos.lat = json_number_value(lat);
 			pos.lng = json_number_value(lon);
 			(void)pthread_mutex_unlock(&mutex);
+			time(&last);
+		} else {
+#define GPS_TIMEOUT	3	/* 3 sec */
+			if (time(NULL) - last > GPS_TIMEOUT)
+				break;
 		}
 		if (lat != NULL)
 			json_decref(lat);
