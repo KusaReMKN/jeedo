@@ -36,9 +36,50 @@
 #include "dirdist.h"
 #include "drive.h"
 #include "gps.h"
+#include "lidar.h"
 
+static void	cancelNoise(struct lidarPoint lps[360]);
+static int	detectObstacle(const struct lidarPoint lps[360]);
 static int	getLocation(struct latlng *cur);
 static int	getNextDest(int sock, struct latlng *dest);
+
+static void
+cancelNoise(struct lidarPoint lps[360])
+{
+#define INTENSITY_THRESHOLD	64	/* FIXME */
+#define DISTANCE_TOO_FAR	12000	/* [mm] */
+#define DISTANCE_TOO_CLOSE	10	/* [mm]; FIXME */
+	int i;
+
+	for (i = 0; i < 360; i++) {
+		/* Low intensity points can be ignored. */
+		if (lps[i].intensity <= INTENSITY_THRESHOLD)
+			lps[i].distance = DISTANCE_TOO_FAR;
+		/* Points too far or too close can be ignored. */
+		if (lps[i].distance > DISTANCE_TOO_FAR
+				|| lps[i].distance < DISTANCE_TOO_CLOSE)
+			lps[i].distance = DISTANCE_TOO_FAR;
+	}
+
+	/* Do LPF */
+}
+
+static int
+detectObstacle(const struct lidarPoint lps[360])
+{
+#define ANGLE_OF_VIEW		90	/* +-45 [deg] */
+#define DISTANCE_TO_OBSTACLE	3000	/* [mm] */
+	int i;
+
+	for (i = 360 - ANGLE_OF_VIEW / 2; i < 360; i++)
+		if (lps[i].distance <= OBSTACLE_DISTANCE)
+			return 1;
+	for (i = 0; i < ANGLE_OF_VIEW / 2; i++)
+		if (lps[i].distance <= OBSTACLE_DISTANCE)
+			return 1;
+
+	return 0;
+}
 
 void *
 drive(void *arg)
@@ -47,6 +88,7 @@ drive(void *arg)
 	struct latlng cur, dest;
 	double angle, heading, leftAngle, rightAngle;
 	char errmesg[256], *reqmesg, resmesg[80];
+	struct lidarPoint lps[360];
 
 	/* Receive the first destination */
 	sock = *(int *)arg;
@@ -57,8 +99,11 @@ drive(void *arg)
 	if (compass == -1)
 		return (void *)-1;
 	denkino = openDenkino(NULL);
-	if (denkino == -1) {
-		(void)close(compass);
+	if (denkino == -1)
+		goto errden;
+	if (initLidar() == -1) {
+		(void)close(denkino);
+errden:		(void)close(compass);
 		return (void *)-1;
 	}
 	/* Main loop */
@@ -74,6 +119,15 @@ drive(void *arg)
 			DEBUG_printf("Reached!!\n");
 			sleep(1);
 			if (getNextDest(sock, &dest) == -1)
+				goto halt;
+			continue;
+		}
+		if (readLidar(lps) == -1)
+			goto halt;
+		cancelNoise(lps);
+		if (detectObstacle(lps)) {
+			if (talkDenkino(denkino, "Zzz...", resmesg,
+						sizeof(resmesg)) == -1)
 				goto halt;
 			continue;
 		}
