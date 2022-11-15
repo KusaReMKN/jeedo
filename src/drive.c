@@ -36,6 +36,7 @@
 #include "denkino.h"
 #include "dirdist.h"
 #include "drive.h"
+#include "filter.h"
 #include "gps.h"
 #include "lidar.h"
 
@@ -50,7 +51,7 @@ cancelNoise(struct lidarPoint lps[360])
 #define INTENSITY_THRESHOLD	64
 #define DISTANCE_TOO_FAR	12000	/* [mm] */
 #define DISTANCE_TOO_CLOSE	500	/* [mm]; Huh, FIXME */
-	static uint16_t prev[360], tmp;
+	static FilterContext ctx[360];
 	int i;
 
 	for (i = 0; i < 360; i++) {
@@ -64,11 +65,8 @@ cancelNoise(struct lidarPoint lps[360])
 	}
 
 	/* LPF; FIXME */
-	for (i = 0; i < 360; i++) {
-		tmp = lps[i].distance + prev[i];
-		prev[i] = lps[i].distance;
-		tmp = lps[i].distance;
-	}
+	for (i = 0; i < 360; i++)
+		lps[i].distance = filter(lps[i].distance, &ctx[i]);
 }
 
 static int
