@@ -46,9 +46,9 @@ static int	getNextDest(int sock, struct latlng *dest);
 static void
 cancelNoise(struct lidarPoint lps[360])
 {
-#define INTENSITY_THRESHOLD	64	/* FIXME */
+#define INTENSITY_THRESHOLD	64
 #define DISTANCE_TOO_FAR	12000	/* [mm] */
-#define DISTANCE_TOO_CLOSE	10	/* [mm]; FIXME */
+#define DISTANCE_TOO_CLOSE	500	/* [mm]; Huh, FIXME */
 	int i;
 
 	for (i = 0; i < 360; i++) {
