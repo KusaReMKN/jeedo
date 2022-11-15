@@ -27,6 +27,7 @@
 
 #include <errno.h>
 #include <math.h>
+#include <stdint.h>
 #include <string.h>
 #include <unistd.h>
 
@@ -49,6 +50,7 @@ cancelNoise(struct lidarPoint lps[360])
 #define INTENSITY_THRESHOLD	64
 #define DISTANCE_TOO_FAR	12000	/* [mm] */
 #define DISTANCE_TOO_CLOSE	500	/* [mm]; Huh, FIXME */
+	static uint16_t prev[360], tmp;
 	int i;
 
 	for (i = 0; i < 360; i++) {
@@ -61,7 +63,12 @@ cancelNoise(struct lidarPoint lps[360])
 			lps[i].distance = DISTANCE_TOO_FAR;
 	}
 
-	/* Do LPF */
+	/* LPF; FIXME */
+	for (i = 0; i < 360; i++) {
+		tmp = lps[i].distance + prev[i];
+		prev[i] = lps[i].distance;
+		tmp = lps[i].distance;
+	}
 }
 
 static int
