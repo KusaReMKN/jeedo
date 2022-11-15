@@ -31,6 +31,7 @@ TARGETS=	compass.pdf \
 		dirdist.pdf dirdist_s.pdf \
 		drive.pdf \
 		gps.pdf \
+		filter.pdf \
 		i2c.pdf \
 		lidar.pdf
 
