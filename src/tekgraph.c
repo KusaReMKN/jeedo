@@ -45,7 +45,7 @@ clearGraph(void)
 int
 endGraph(void)
 {
-	return printf("\x1B[?38l");
+	return printf("\x1B[?38l\x1B\x03");
 }
 
 int
