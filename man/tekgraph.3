@@ -1,0 +1,126 @@
+.\"
+.\" Copyright (c) 2023, KusaReMKN.
+.\" All rights reserved.
+.\"
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions are met:
+.\"
+.\" 1. Redistributions of source code must retain the above copyright notice,
+.\"    this list of conditions and the following disclaimer.
+.\"
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\"
+.\" THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+.\" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+.\" IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+.\" ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+.\" LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+.\" CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+.\" SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+.\" INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+.\" CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+.\" ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+.\" POSSIBILITY OF SUCH DAMAGE.
+.\"
+.Dd $Mdocdate$
+.Dt TEKGRAPH \&3 "Jeedo Programmer's Manual"
+.Os Jeedo
+.
+.Sh 名称
+.Nm tekgraph
+.Nd Tektronix モードのためのラッパ関数群
+.
+.Sh ライブラリ
+.Lb libc
+.
+.Sh 書式
+.Fd "#include \(dqtekgraph.h\(dq"
+.Ft int
+.Fn geginGraph "void"
+.Ft int
+.Fn clearGraph "void"
+.Ft int
+.Fn endGraph "void"
+.Ft int
+.Fn beginLine "int type"
+.Ft int
+.Fn moveTo "int x" "int y"
+.Ft void
+.Fn moveCircle "int x" "int y" "int r" "int n"
+.Ft int
+.Fn commit "void"
+.Ft int
+.Fn beginCursot "void"
+.
+.Sh 解説
+.Fn beginGraph
+関数は、Tektronix モードに入るためのシーケンスを出力します。
+.Pp
+.Fn clearGraph
+関数は、Tektronix モードにおいて画面をクリアするためのシーケンスを出力します。
+.Pp
+.Fn engGraph
+関数は、Tektronix モードから VT100 モードに切り替えるためのシーケンスを
+出力します。
+.Pp
+.Fn beginLine
+関数は、Tektronix モードにおいて直線の描画を開始するシーケンスを出力します。
+.Fa type
+には次のような値を指定できます（完全な一覧は
+.Xr XXX
+を参照してください）\h'-1n'。
+.Pp
+.TS
+center;
+cfB cfB
+n l.
+_
+\f(CItype\fP の値	線の種類
+_
+0	実線
+1	点線
+2	一点鎖線
+3	短い鎖線
+4	長い鎖線
+_
+.TE
+.Pp
+.Fn moveTo
+関数は、カーソルの位置を
+.Fa ( x , y )
+で指定される位置に移動するシーケンスを出力します。
+.Fa x
+の範囲は [0,\ 1023]、
+.Fa y
+の範囲は [0,\ 778] です。
+.Pp
+.Fn moveCircle
+関数は、
+.Fn moveTo
+関数を組み合わせて
+.Fa ( x , y )
+を中心とする半径
+.Fa r
+の円を描画する（実際には正
+.Fa n
+角形を描画する）シーケンスを出力します。
+.Pp
+.Fn commit
+関数は、描画や移動を確定するシーケンスを出力します。
+.Pp
+.Fn beginCursor
+関数は、Tektronix モードにおいてカーソルの位置を設定するシーケンスを
+出力します。
+.
+.Sh 関連項目
+.Xr xterm 1
+.Rs
+.%T Xterm Control Sequences
+.Re
+.
+.Sh 著作権
+\(co 2022
+.An KusaReMKN .
+The 2-Clause BSD License の下で利用可能です。

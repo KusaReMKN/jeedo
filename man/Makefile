@@ -32,7 +32,8 @@ TARGETS=	compass.pdf \
 		drive.pdf \
 		gps.pdf \
 		i2c.pdf \
-		lidar.pdf
+		lidar.pdf \
+		tekgraph.pdf
 
 GROFF=		LC_CTYPE=ja_JP.eucJP groff
 GROFFFLAGS=	-P-pa4 -ept -dlang=ja_JP.eucJP -ma4 -mandoc
