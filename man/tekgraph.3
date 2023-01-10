@@ -38,7 +38,7 @@
 .Sh 書式
 .Fd "#include \(dqtekgraph.h\(dq"
 .Ft int
-.Fn geginGraph "void"
+.Fn beginGraph "void"
 .Ft int
 .Fn clearGraph "void"
 .Ft int
@@ -52,7 +52,7 @@
 .Ft int
 .Fn commit "void"
 .Ft int
-.Fn beginCursot "void"
+.Fn beginCursor "void"
 .
 .Sh 解説
 .Fn beginGraph
@@ -61,7 +61,7 @@
 .Fn clearGraph
 関数は、Tektronix モードにおいて画面をクリアするためのシーケンスを出力します。
 .Pp
-.Fn engGraph
+.Fn endGraph
 関数は、Tektronix モードから VT100 モードに切り替えるためのシーケンスを
 出力します。
 .Pp
