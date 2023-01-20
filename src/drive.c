@@ -111,7 +111,7 @@ error:		(void)close(compass);
 		DEBUG_printf("cur -> dest : (%.9f, %.9f) -> (%.9f, %.9f)\n",
 				cur.lat, cur.lng, dest.lat, dest.lng);
 		if (isReached(&cur, &dest)) {
-			if (talkDenkino(denkino, "", resmesg, sizeof(resmesg))
+			if (talkDenkino(denkino, "B", resmesg, sizeof(resmesg))
 					== -1)
 				goto halt;
 			DEBUG_printf("Reached!!\n");
