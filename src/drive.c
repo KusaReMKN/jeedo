@@ -124,7 +124,7 @@ error:		(void)close(compass);
 			goto halt;
 		cancelNoise(lps);
 		if (detectObstacle(lps)) {
-			if (talkDenkino(denkino, "Z", resmesg, sizeof(resmesg))
+			if (talkDenkino(denkino, "B", resmesg, sizeof(resmesg))
 					== -1)
 				goto halt;
 			usleep(100000);
