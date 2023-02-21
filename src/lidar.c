@@ -37,7 +37,7 @@
 #include <termios.h>
 #include <unistd.h>
 
-#include "debug.h"
+#include "errwarn.h"
 #include "lidar.h"
 
 #define LIDAR_PATH	"/dev/ttyUSB0"
@@ -305,6 +305,7 @@ watchLidar(void *arg)
 	running = 1;
 	fd = openLidar(&prev);
 	if (fd == -1) {
+		warning("openLidar: %s\n", strerror(errno));
 		running = 0;
 		return (void *)-1;
 	}
@@ -312,8 +313,10 @@ watchLidar(void *arg)
 
 	pthread_cleanup_push(cleanUpWatcher, &ls);
 	while (/* CONSTCOND */ 1) {
-		if (readPacket(fd, &packet) == -1)
+		if (readPacket(fd, &packet) == -1) {
+			warning("readPacket: %s\n", strerror(errno));
 			break;
+		}
 		if (packet.start > packet.end)
 			packet.end += 36000;
 		dAngle = (packet.end - packet.start) * 0.01

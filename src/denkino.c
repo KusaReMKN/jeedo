@@ -36,7 +36,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "debug.h"	/* 123 */
+#include "errwarn.h"
 #include "denkino.h"
 
 #define DENKINO_PATH	"/dev/ttyS0"
@@ -121,7 +121,7 @@ talkDenkino(int fd, const char *restrict req, char *restrict res, size_t len)
 			return -1;
 		if (ret != 0)
 			break;
-		DEBUG_printf("Received no reply, retrying ... %d\n", attempt);
+		warning("Received no reply, retrying ... %d / 3\n", attempt);
 	} while (attempt++ < 3);
 	if (attempt > 3) {
 		errno = EAGAIN;

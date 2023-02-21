@@ -38,6 +38,7 @@
 #include <time.h>
 #include <unistd.h>
 
+#include "errwarn.h"
 #include "dirdist.h"
 #include "gps.h"
 
@@ -188,18 +189,23 @@ watchGps(void *arg)
 	running = 1;
 	sock = tcpConnect(GPSD_HOST, GPSD_SERV);
 	if (sock == -1) {
+		warning("tcpConnect: %s\n", strerror(errno));
 		running = 0;
 		return (void *)-1;
 	}
 
 	pthread_cleanup_push(cleanUpWatcher, &sock);
-	if (write(sock, GPSD_REQUEST, strlen(GPSD_REQUEST)) == -1)
+	if (write(sock, GPSD_REQUEST, strlen(GPSD_REQUEST)) == -1) {
+		warning("write: %s\n", strerror(errno));
 		goto fatal;
+	}
 
 	while (/* CONSTCOND */ 1) {
 		root = json_loadfd(sock, JSON_DISABLE_EOF_CHECK, NULL);
-		if (root == NULL)
+		if (root == NULL) {
+			warning("JSON parse error\n");
 			break;
+		}
 		lat = json_object_get(root, "lat");
 		lon = json_object_get(root, "lon");
 		if (lat != NULL && lon != NULL) {
@@ -210,8 +216,10 @@ watchGps(void *arg)
 			time(&last);
 		} else {
 #define GPS_TIMEOUT	3	/* 3 sec */
-			if (time(NULL) - last > GPS_TIMEOUT)
+			if (time(NULL) - last > GPS_TIMEOUT) {
+				warning("GPS timed out\n");
 				break;
+			}
 		}
 		if (lat != NULL)
 			json_decref(lat);
