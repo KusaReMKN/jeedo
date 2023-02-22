@@ -25,7 +25,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-TARGETS=	compass_test lidar_test nowave
+TARGETS=	compass_test lidar_test nowave onwave
 
 CFLAGS=		-I../src -O2 -Wall
 RM=		rm -f
@@ -42,6 +42,10 @@ lidar_test:	lidar_test.o lidar.o tekgraph.o
 
 nowave:		nowave.o compass.o denkino.o dirdist.o drive.o gps.o i2c.o
 	$(CC) -o $@ $^ -lm -ljansson -pthread
+
+onwave:		onwave.o compass.o denkino.o dirdist.o drive.o gps.o i2c.o \
+		manki.o
+	$(CC) -o $@ $^ -lm -ljansson -lcurl -pthread
 
 .PHONY: clean
 clean:
