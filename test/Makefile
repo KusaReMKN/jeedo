@@ -40,8 +40,7 @@ compass_test:	compass_test.o compass.o i2c.o
 lidar_test:	lidar_test.o lidar.o tekgraph.o
 	$(CC) -o $@ $^ -lm -pthread
 
-nowave:		nowave.o compass.o denkino.o dirdist.o drive.o gps.o i2c.o \
-		lidar.o
+nowave:		nowave.o compass.o denkino.o dirdist.o drive.o gps.o i2c.o
 	$(CC) -o $@ $^ -lm -ljansson -pthread
 
 .PHONY: clean
