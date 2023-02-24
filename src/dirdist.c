@@ -126,8 +126,7 @@ moveBy(struct latlng *p, double distance, double direction)
 double
 normalize(double deg)
 {
-	while (deg > 360)
-		deg -= 360;
+	deg = fmod(deg, 360);
 	while (deg < 0)
 		deg += 360;
 	return deg;
@@ -146,9 +145,10 @@ normalizeLat(double lat)
 static double
 normalizeLng(double lng)
 {
-	while (lng > 180)
-		lng -= 360;
-	while (lng < -180)
+	lng += 180;
+	lng = fmod(lng, 360);
+	while (lng < 0)
 		lng += 360;
+	lng -= 180;
 	return lng;
 }
