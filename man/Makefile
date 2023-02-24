@@ -30,6 +30,7 @@ TARGETS=	compass.pdf \
 		denkino.pdf \
 		dirdist.pdf \
 		drive.pdf \
+		errwarn.pdf \
 		gps.pdf \
 		i2c.pdf \
 		lidar.pdf \
