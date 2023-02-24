@@ -28,7 +28,7 @@
 TARGETS=	compass.pdf \
 		debug.pdf \
 		denkino.pdf \
-		dirdist.pdf dirdist_s.pdf \
+		dirdist.pdf \
 		drive.pdf \
 		gps.pdf \
 		i2c.pdf \
