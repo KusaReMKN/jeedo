@@ -1,0 +1,117 @@
+.\"
+.\" Copyright (c) 2023, KusaReMKN.
+.\" All rights reserved.
+.\"
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions are met:
+.\"
+.\" 1. Redistributions of source code must retain the above copyright notice,
+.\"    this list of conditions and the following disclaimer.
+.\"
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\"
+.\" THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+.\" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+.\" IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+.\" ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+.\" LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+.\" CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+.\" SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+.\" INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+.\" CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+.\" ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+.\" POSSIBILITY OF SUCH DAMAGE.
+.\"
+.Dd $Mdocdate$
+.Dt MANKI \&3 "Jeedo Programmer's Manual"
+.Os Jeedo
+.
+.Sh 名称
+.Nm manki
+.Nd Manki API の呼び出し
+.
+.Sh ライブラリ
+.Lb libc ,
+.Lb libm ,
+.Lb libcurl (libcurl, \-lcurl)
+及び
+.Lb Jansson (libjansson, \-ljansson)
+.
+.Sh 書式
+.In stdint.h
+.In curl/curl.h
+.Fd "#include \(dqdirdist.h\(dq"
+.Fd "#include \(dqmanki.h\(dq"
+.Bd -literal -compact
+/* Manki API の呼び出しコンテキストを格納するオブジェクト */
+struct carContext {
+	const char *carId;		/* 車両識別子 */
+	uint_fast32_t sequence;	/* 通信番号 */
+	const char *response;		/* 応答文 */
+	struct latlng destination;	/* 目的地座標 */
+};
+.Ed
+.Ft CURLcode
+.Fn manki "struct carContext *restrict ctx" "int cmd" \
+          "const struct latlng *restrict pos" "int btr"
+.
+.Sh 解説
+.Fn manki
+関数は、Manki API を呼び出します。
+.Fa ctx
+には API の呼び出しコンテキストを指すポインタを指定します。
+コンテキストの内容は呼び出しによって更新されます。
+API を呼び出す際の要求は
+.Fa cmd
+で指定されます。
+これには
+.Dv MR_HELLO , MR_PING , MR_NEXT
+及び
+.Dv MR_HALT
+のいづれかを指定します。
+.Fa pos
+には車両の現在位置を指すポインタを指定します。
+.Fa btr
+には車両のバッテリ残量をパーセント単位で指定します。
+.
+.Sh 戻り値
+.Fn manki
+関数は処理が成功すると値
+.Dv CURLE_OK
+を返します。
+失敗するとエラーを示す値を返します。
+.
+.Sh エラー
+.Fn manki
+関数は、以下の場合に失敗します。
+.Bl -tag -width Er
+.It Bq Li (CURLcode)-1
+要求文の生成に失敗しました。
+.It Bq Li (CURLcode)-2
+応答文の解釈に失敗しました。
+.It Bq Li (CURLcode)-3
+API の呼び出しに失敗しました。
+.Li ctx.response
+に失敗の理由があります。
+.El
+.Pp
+加えて、通常の
+.Dv CURLcode
+が示すエラーを発生させます。
+.
+.Sh 関連項目
+.Xr libcurl 3
+.
+.Sh 著作権
+\(co 2023
+.An KusaReMKN .
+The 2-Clause BSD License の下で利用可能です。
+.
+.Sh バグ
+.Fa ctx
+の内容が更新されるとき、
+.Xr malloc 3
+で確保された領域へのポインタが設定されることがあります。
+これを解放しないとメモリリークとなります。

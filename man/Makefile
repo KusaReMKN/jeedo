@@ -34,6 +34,7 @@ TARGETS=	compass.pdf \
 		gps.pdf \
 		i2c.pdf \
 		lidar.pdf \
+		manki.pdf \
 		tekgraph.pdf
 
 GROFF=		LC_CTYPE=ja_JP.eucJP groff
